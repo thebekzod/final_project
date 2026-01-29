@@ -72,3 +72,19 @@ Me:
 curl http://127.0.0.1:8000/api/auth/me \
   -H "Authorization: Bearer <token>"
 ```
+
+## Password length limit (bcrypt)
+
+Bcrypt only accepts passwords up to 72 bytes (UTF-8 byte length). Requests above that will return a clear error instead of being hashed.
+
+Reproduce (send a password longer than 72 bytes):
+```bash
+python - <<'PY'
+import requests
+
+payload = {"email": "long@example.com", "password": "a" * 73}
+response = requests.post("http://127.0.0.1:8000/api/auth/register", json=payload)
+print(response.status_code)
+print(response.json())
+PY
+```

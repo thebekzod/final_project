@@ -26,6 +26,7 @@ TRANSLATIONS = {
         "registration_success": "Registration successful. Please log in.",
         "invalid_credentials": "Invalid email or password.",
         "email_exists": "Email already registered.",
+        "password_too_long": "Password must be at most 72 bytes.",
         "welcome": "Welcome",
         "loading": "Loading...",
         "not_logged_in": "Not logged in.",
@@ -47,6 +48,7 @@ TRANSLATIONS = {
         "registration_success": "Регистрация прошла успешно. Войдите в систему.",
         "invalid_credentials": "Неверный email или пароль.",
         "email_exists": "Email уже зарегистрирован.",
+        "password_too_long": "Пароль должен быть не длиннее 72 байт.",
         "welcome": "Добро пожаловать",
         "loading": "Загрузка...",
         "not_logged_in": "Вы не вошли в систему.",
@@ -108,9 +110,20 @@ def register_action(
     password: str = Form(...),
     db: Session = Depends(get_db),
 ):
+    lang = get_lang(request)
+    if auth.is_password_too_long(password):
+        return templates.TemplateResponse(
+            "register.html",
+            {
+                "request": request,
+                "t": TRANSLATIONS[lang],
+                "lang": lang,
+                "error": TRANSLATIONS[lang]["password_too_long"],
+            },
+            status_code=400,
+        )
     existing = db.query(models.User).filter(models.User.email == email).first()
     if existing:
-        lang = get_lang(request)
         return templates.TemplateResponse(
             "register.html",
             {
@@ -152,6 +165,17 @@ def login_action(
     db: Session = Depends(get_db),
 ):
     lang = get_lang(request)
+    if auth.is_password_too_long(password):
+        return templates.TemplateResponse(
+            "login.html",
+            {
+                "request": request,
+                "t": TRANSLATIONS[lang],
+                "lang": lang,
+                "error": TRANSLATIONS[lang]["password_too_long"],
+            },
+            status_code=400,
+        )
     user = db.query(models.User).filter(models.User.email == email).first()
     if not user or not auth.verify_password(password, user.hashed_password):
         return templates.TemplateResponse(
