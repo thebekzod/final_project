@@ -7,7 +7,6 @@ from . import auth, models
 from .db import SessionLocal
 
 router = APIRouter()
-
 templates = Jinja2Templates(directory="app/templates")
 
 TRANSLATIONS = {
@@ -26,7 +25,6 @@ TRANSLATIONS = {
         "registration_success": "Registration successful. Please log in.",
         "invalid_credentials": "Invalid email or password.",
         "email_exists": "Email already registered.",
-        "password_too_long": "Password must be at most 72 bytes.",
         "welcome": "Welcome",
         "loading": "Loading...",
         "not_logged_in": "Not logged in.",
@@ -48,7 +46,6 @@ TRANSLATIONS = {
         "registration_success": "Регистрация прошла успешно. Войдите в систему.",
         "invalid_credentials": "Неверный email или пароль.",
         "email_exists": "Email уже зарегистрирован.",
-        "password_too_long": "Пароль должен быть не длиннее 72 байт.",
         "welcome": "Добро пожаловать",
         "loading": "Загрузка...",
         "not_logged_in": "Вы не вошли в систему.",
@@ -60,9 +57,7 @@ TRANSLATIONS = {
 
 def get_lang(request: Request) -> str:
     lang = request.cookies.get("lang", "en")
-    if lang not in TRANSLATIONS:
-        return "en"
-    return lang
+    return lang if lang in TRANSLATIONS else "en"
 
 
 def get_db():
@@ -78,11 +73,7 @@ def home(request: Request):
     lang = get_lang(request)
     return templates.TemplateResponse(
         "index.html",
-        {
-            "request": request,
-            "t": TRANSLATIONS[lang],
-            "lang": lang,
-        },
+        {"request": request, "t": TRANSLATIONS[lang], "lang": lang},
     )
 
 
@@ -93,13 +84,7 @@ def register_page(request: Request):
     error = request.query_params.get("error")
     return templates.TemplateResponse(
         "register.html",
-        {
-            "request": request,
-            "t": TRANSLATIONS[lang],
-            "lang": lang,
-            "message": message,
-            "error": error,
-        },
+        {"request": request, "t": TRANSLATIONS[lang], "lang": lang, "message": message, "error": error},
     )
 
 
@@ -111,34 +96,20 @@ def register_action(
     db: Session = Depends(get_db),
 ):
     lang = get_lang(request)
-    if auth.is_password_too_long(password):
-        return templates.TemplateResponse(
-            "register.html",
-            {
-                "request": request,
-                "t": TRANSLATIONS[lang],
-                "lang": lang,
-                "error": TRANSLATIONS[lang]["password_too_long"],
-            },
-            status_code=400,
-        )
+
     existing = db.query(models.User).filter(models.User.email == email).first()
     if existing:
         return templates.TemplateResponse(
             "register.html",
-            {
-                "request": request,
-                "t": TRANSLATIONS[lang],
-                "lang": lang,
-                "error": TRANSLATIONS[lang]["email_exists"],
-            },
+            {"request": request, "t": TRANSLATIONS[lang], "lang": lang, "error": TRANSLATIONS[lang]["email_exists"]},
             status_code=400,
         )
+
     user = models.User(email=email, hashed_password=auth.hash_password(password))
     db.add(user)
     db.commit()
-    response = RedirectResponse(url="/login?registered=1", status_code=303)
-    return response
+
+    return RedirectResponse(url="/login?registered=1", status_code=303)
 
 
 @router.get("/login")
@@ -146,14 +117,10 @@ def login_page(request: Request):
     lang = get_lang(request)
     registered = request.query_params.get("registered")
     message = TRANSLATIONS[lang]["registration_success"] if registered else None
+    error = request.query_params.get("error")
     return templates.TemplateResponse(
         "login.html",
-        {
-            "request": request,
-            "t": TRANSLATIONS[lang],
-            "lang": lang,
-            "message": message,
-        },
+        {"request": request, "t": TRANSLATIONS[lang], "lang": lang, "message": message, "error": error},
     )
 
 
@@ -165,29 +132,22 @@ def login_action(
     db: Session = Depends(get_db),
 ):
     lang = get_lang(request)
-    if auth.is_password_too_long(password):
-        return templates.TemplateResponse(
-            "login.html",
-            {
-                "request": request,
-                "t": TRANSLATIONS[lang],
-                "lang": lang,
-                "error": TRANSLATIONS[lang]["password_too_long"],
-            },
-            status_code=400,
-        )
+
     user = db.query(models.User).filter(models.User.email == email).first()
-    if not user or not auth.verify_password(password, user.hashed_password):
+    if not user:
         return templates.TemplateResponse(
             "login.html",
-            {
-                "request": request,
-                "t": TRANSLATIONS[lang],
-                "lang": lang,
-                "error": TRANSLATIONS[lang]["invalid_credentials"],
-            },
+            {"request": request, "t": TRANSLATIONS[lang], "lang": lang, "error": TRANSLATIONS[lang]["invalid_credentials"]},
             status_code=401,
         )
+
+    if not auth.verify_password(password, user.hashed_password):
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "t": TRANSLATIONS[lang], "lang": lang, "error": TRANSLATIONS[lang]["invalid_credentials"]},
+            status_code=401,
+        )
+
     token = auth.create_access_token(subject=user.email)
     response = RedirectResponse(url="/", status_code=303)
     response.set_cookie("access_token", token, httponly=False, samesite="lax")
