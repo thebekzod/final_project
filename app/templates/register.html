@@ -1,20 +1,24 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{ t.register_title }}</h1>
-<form method="post" action="/register">
-    <label>
-        {{ t.email }}
-        <input type="email" name="email" required />
-    </label>
-    <label>
-        {{ t.password }}
-        <input type="password" name="password" required />
-    </label>
-    <button type="submit">{{ t.submit }}</button>
-</form>
-<p>
-    {{ t.already_have }}
-    <a href="/login">{{ t.login }}</a>
-</p>
+<div class="max-w-lg rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-xl">
+    <h1 class="text-2xl font-semibold text-white">{{ t.register_title }}</h1>
+    <form method="post" action="/register" class="mt-6 space-y-4">
+        <div>
+            <label class="text-sm text-slate-300" for="email">{{ t.email }}</label>
+            <input class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-slate-100" type="email" name="email" id="email" required />
+        </div>
+        <div>
+            <label class="text-sm text-slate-300" for="password">{{ t.password }}</label>
+            <input class="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950/80 px-3 py-2 text-slate-100" type="password" name="password" id="password" required />
+        </div>
+        <button class="w-full rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-400" type="submit">
+            {{ t.submit }}
+        </button>
+    </form>
+    <p class="mt-4 text-sm text-slate-400">
+        {{ t.already_have }}
+        <a class="text-indigo-300 hover:text-indigo-200" href="/login">{{ t.login }}</a>
+    </p>
+</div>
 {% endblock %}
