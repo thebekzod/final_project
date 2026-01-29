@@ -10,6 +10,16 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+BCRYPT_MAX_PASSWORD_BYTES = 72
+
+
+def password_length_bytes(password: str) -> int:
+    return len(password.encode("utf-8"))
+
+
+def is_password_too_long(password: str) -> bool:
+    return password_length_bytes(password) > BCRYPT_MAX_PASSWORD_BYTES
+
 
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
