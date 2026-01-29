@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ t.app_name }}</title>
+    <link rel="icon" href="data:," />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        nav { margin-bottom: 1.5rem; }
+        nav a { margin-right: 1rem; }
+        .message { padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; }
+        .message.success { background: #e6ffed; border: 1px solid #b7ebc6; }
+        .message.error { background: #ffeaea; border: 1px solid #f5b5b5; }
+        form { max-width: 420px; }
+        label { display: block; margin-top: 1rem; }
+        input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; }
+        button { margin-top: 1rem; padding: 0.5rem 1rem; }
+        .lang-toggle { margin-left: 1rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <strong>{{ t.app_name }}</strong>
+        <a href="/">{{ t.home }}</a>
+        <a href="/register">{{ t.register }}</a>
+        <a href="/login">{{ t.login }}</a>
+        <span class="lang-toggle">
+            {{ t.language }}:
+            <a href="/lang/en">EN</a> |
+            <a href="/lang/ru">RU</a>
+        </span>
+    </nav>
+
+    {% if message %}
+        <div class="message success">{{ message }}</div>
+    {% endif %}
+    {% if error %}
+        <div class="message error">{{ error }}</div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

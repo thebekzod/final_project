@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ t.welcome }}</h1>
+<p>
+    <strong>{{ t.email }}:</strong>
+    <span
+        id="user-email"
+        data-loading="{{ t.loading }}"
+        data-logged-out="{{ t.not_logged_in }}"
+    >{{ t.loading }}</span>
+</p>
+{% endblock %}
