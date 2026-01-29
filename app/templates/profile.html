@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-xl">
+    <h1 class="text-2xl font-semibold text-white">{{ t.profile_title }}</h1>
+    <p class="mt-4 text-slate-300">{{ t.logged_in_as }}: <strong>{{ current_email }}</strong></p>
+    <div class="mt-6 flex flex-col gap-3">
+        <a class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-slate-500" href="/jobs/new">
+            {{ t.cta_create_job }}
+        </a>
+        <a class="rounded-lg border border-slate-700 px-4 py-2 text-sm font-semibold text-slate-200 hover:border-slate-500" href="/freelancers/new">
+            {{ t.cta_create_profile }}
+        </a>
+    </div>
+</div>
+{% endblock %}

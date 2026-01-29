@@ -1,12 +1,12 @@
 # NEONHIRE (Clean)
 
-A minimal FastAPI + SQLite demo app with registration, login (JWT), and a protected "Me" endpoint. Includes EN/RU language toggle and simple Jinja2 pages.
+A minimal FastAPI + SQLite demo app with registration, login (JWT), and a protected "Me" endpoint. Includes EN/RU language toggle and Jinja2 pages for a freelance marketplace demo.
 
 ## Features
 
 - Registration and login with SQLite
 - JWT auth with `/api/auth/me`
-- Jinja2 pages for Register/Login/Home
+- Jinja2 pages for Home, Jobs, Freelancers, Profile
 - EN/RU language toggle via cookie
 - Works on Windows + Python 3.13
 
@@ -41,6 +41,16 @@ A minimal FastAPI + SQLite demo app with registration, login (JWT), and a protec
 9. Register a new account.
 10. Log in at `/login` and confirm the home page shows your email.
 
+## Demo flow (freelance marketplace)
+
+1. Register a new user at `/register`.
+2. Log in at `/login`.
+3. Open `/jobs/new` and create a job post.
+4. Open `/freelancers/new` and create a freelancer profile.
+5. Visit `/jobs` and `/freelancers` to confirm lists.
+6. Open `/profile` for quick links.
+7. Click **Log out** to clear the session cookie.
+
 ## Manual verification checklist
 
 - `pip install -r requirements.txt` works on Windows Python 3.13
@@ -48,6 +58,8 @@ A minimal FastAPI + SQLite demo app with registration, login (JWT), and a protec
 - `/register` creates user in `app.db`
 - After registration, UI shows success message and redirects to `/login`
 - `/login` returns token; home page shows user email
+- `/jobs/new` and `/freelancers/new` create records and redirect with success message
+- `/jobs` and `/freelancers` list newest items first
 - RU/EN toggle changes text; no console errors
 - `GET /api/auth/me` returns current user with Authorization header
 
@@ -73,18 +85,6 @@ curl http://127.0.0.1:8000/api/auth/me \
   -H "Authorization: Bearer <token>"
 ```
 
-## Password length limit (bcrypt)
+## Password handling (bcrypt + SHA-256 prehash)
 
-Bcrypt only accepts passwords up to 72 bytes (UTF-8 byte length). Requests above that will return a clear error instead of being hashed.
-
-Reproduce (send a password longer than 72 bytes):
-```bash
-python - <<'PY'
-import requests
-
-payload = {"email": "long@example.com", "password": "a" * 73}
-response = requests.post("http://127.0.0.1:8000/api/auth/register", json=payload)
-print(response.status_code)
-print(response.json())
-PY
-```
+Passwords are SHA-256 pre-hashed before bcrypt, enabling unlimited length inputs while keeping bcrypt compatibility.
